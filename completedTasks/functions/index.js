@@ -65,47 +65,47 @@ const colorMap = {
 // The Fake Color Carousel will display a carousel of color cards
 const fakeColorCarousel = () => {
   const carousel = new Carousel({
-    items: {
-      'indigo taco': {
-        title: 'Indigo Taco',
-        synonyms: ['indigo', 'taco'],
-        image: new Image({
-          url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDN1JRbF9ZMHZsa1k/style-color-uiapplication-palette1.png',
-          alt: 'Indigo Taco Color',
-        }),
-      },
-      'pink unicorn': {
-        title: 'Pink Unicorn',
-        synonyms: ['pink', 'unicorn'],
-        image: new Image({
-          url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDbFVfTXpoaEE5Vzg/style-color-uiapplication-palette2.png',
-          alt: 'Pink Unicorn Color',
-        }),
-      },
-      'blue grey coffee': {
-        title: 'Blue Grey Coffee',
-        synonyms: ['blue', 'grey', 'coffee'],
-        image: new Image({
-          url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDZUdpeURtaTUwLUk/style-color-colorsystem-gray-secondary-161116.png',
-          alt: 'Blue Grey Coffee Color',
-        }),
-      },
-  }});
-  return carousel;
+   items: {
+     'indigo taco': {
+       title: 'Indigo Taco',
+       synonyms: ['indigo', 'taco'],
+       image: new Image({
+         url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDN1JRbF9ZMHZsa1k/style-color-uiapplication-palette1.png',
+         alt: 'Indigo Taco Color',
+       }),
+     },
+     'pink unicorn': {
+       title: 'Pink Unicorn',
+       synonyms: ['pink', 'unicorn'],
+       image: new Image({
+         url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDbFVfTXpoaEE5Vzg/style-color-uiapplication-palette2.png',
+         alt: 'Pink Unicorn Color',
+       }),
+     },
+     'blue grey coffee': {
+       title: 'Blue Grey Coffee',
+       synonyms: ['blue', 'grey', 'coffee'],
+       image: new Image({
+         url: 'https://storage.googleapis.com/material-design/publish/material_v_12/assets/0BxFyKV4eeNjDZUdpeURtaTUwLUk/style-color-colorsystem-gray-secondary-161116.png',
+         alt: 'Blue Grey Coffee Color',
+       }),
+     },
+ }});
+ return carousel;
 };
 
 // Handle the Dialogflow intent named 'Default Welcome Intent'.
 app.intent('Default Welcome Intent', (conv) => {
-  const name = conv.user.storage.userName;
-  if (!name) {
-    // Asks the user's permission to know their name, for personalization.
-    conv.ask(new Permission({
-      context: 'Hi there, to get to know you better',
-      permissions: 'NAME',
-    }));
-  } else {
-    conv.ask(`Hi again, ${name}. What's your favorite color?`);
-  }
+ const name = conv.user.storage.userName;
+ if (!name) {
+   // Asks the user's permission to know their name, for personalization.
+   conv.ask(new Permission({
+     context: 'Hi there, to get to know you better',
+     permissions: 'NAME',
+   }));
+ } else {
+   conv.ask(`Hi again, ${name}. What's your favorite color?`);
+ }
 });
 
 // Handle the Dialogflow intent named 'actions_intent_PERMISSION'. If user
@@ -117,10 +117,9 @@ app.intent('actions_intent_PERMISSION', (conv, params, permissionGranted) => {
     conv.ask(new Suggestions('Blue', 'Red', 'Green'));
   } else {
     // If the user accepted our request, store their name in
-    // the 'conv.user.storage' object for future conversations.
+    // the 'conv.user.storage' object for the duration of the conversation.
     conv.user.storage.userName = conv.user.name.display;
-    conv.ask(`Thanks, ${conv.user.storage.userName}. ` +
-      `What's your favorite color?`);
+    conv.ask(`Thanks, ${conv.user.storage.userName}. What's your favorite color?`);
     conv.ask(new Suggestions('Blue', 'Red', 'Green'));
   }
 });
@@ -159,6 +158,13 @@ app.intent('favorite fake color', (conv, {fakeColor}) => {
   conv.ask(new Suggestions('Yes', 'No'));
 });
 
+// Handle the Dialogflow follow-up intents
+app.intent(['favorite color - yes', 'favorite fake color - yes'], (conv) => {
+ conv.ask('Which color, indigo taco, pink unicorn or blue grey coffee?');
+ // If the user is using a screened device, display the carousel
+ if (conv.screen) return conv.ask(fakeColorCarousel());
+});
+
 // Handle the Dialogflow NO_INPUT intent.
 // Triggered when the user doesn't provide input to the Action
 app.intent('actions_intent_NO_INPUT', (conv) => {
@@ -172,13 +178,6 @@ app.intent('actions_intent_NO_INPUT', (conv) => {
     conv.close(`Sorry we're having trouble. Let's ` +
       `try this again later. Goodbye.`);
   }
-});
-
-// Handle the Dialogflow follow-up intents
-app.intent(['favorite color - yes', 'favorite fake color - yes'], (conv) => {
-  conv.ask('Which color, indigo taco, pink unicorn or blue grey coffee?');
-  // If the user is using a screened device, display the carousel
-  if (conv.screen) return conv.ask(fakeColorCarousel());
 });
 
 // Set the DialogflowApp object to handle the HTTPS POST request.
